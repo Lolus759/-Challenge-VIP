@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acheter des Parties - Challenge VIP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        h2 { color: #f8fafc; font-size: 22px; margin-bottom: 8px; font-weight: 600; }
+        p.subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 25px; }
+
+        .offres-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .offre-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .offre-card:hover {
+            border-color: #25D366;
+            transform: translateY(-2px);
+        }
+        .offre-details {
+            text-align: left;
+        }
+        .offre-details h3 { font-size: 16px; color: #f8fafc; font-weight: 600; }
+        .offre-details span { font-size: 13px; color: #4ade80; font-weight: 600; }
+
+        .whatsapp-achat-btn {
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            white-space: nowrap;
+        }
+        .whatsapp-achat-btn:hover { background: #20ba5a; transform: scale(1.05); }
+
+        .btn-retour {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-retour:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Recharger des Parties</h2>
+        <p class="subtitle">Sélectionnez une offre pour valider directement via WhatsApp</p>
+
+        <div class="offres-grid">
+            <!-- Offre 1 -->
+            <div class="offre-card">
+                <div class="offre-details">
+                    <h3>100 Parties</h3>
+                    <span>40 HTG</span>
+                </div>
+                <a href="https://wa.me/50940267913?text=Bonjour,%20je%20souhaite%20acheter%20l'offre%20de%20100%20parties%20pour%2040%20HTG." target="_blank" class="whatsapp-achat-btn">
+                    <i class="fab fa-whatsapp"></i> Acheter
+                </a>
+            </div>
+
+            <!-- Offre 2 -->
+            <div class="offre-card">
+                <div class="offre-details">
+                    <h3>120 Parties</h3>
+                    <span>50 HTG</span>
+                </div>
+                <a href="https://wa.me/50940267913?text=Bonjour,%20je%20souhaite%20acheter%20l'offre%20de%20120%20parties%20pour%2050%20HTG." target="_blank" class="whatsapp-achat-btn">
+                    <i class="fab fa-whatsapp"></i> Acheter
+                </a>
+            </div>
+
+            <!-- Offre 3 -->
+            <div class="offre-card">
+                <div class="offre-details">
+                    <h3>150 Parties</h3>
+                    <span>60 HTG</span>
+                </div>
+                <a href="https://wa.me/50940267913?text=Bonjour,%20je%20souhaite%20acheter%20l'offre%20de%20150%20parties%20pour%2060%20HTG." target="_blank" class="whatsapp-achat-btn">
+                    <i class="fab fa-whatsapp"></i> Acheter
+                </a>
+            </div>
+        </div>
+
+        <a href="dashboard_principal.html" class="btn-retour">
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+        </a>
+    </div>
+
+</body>
+</html>

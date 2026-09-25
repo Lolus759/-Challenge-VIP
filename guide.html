@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide & Primes VIP - Challenge Flight 3D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #090d16;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Top Bar Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(-3px); }
+
+        /* Banner d'Entête */
+        .hero-banner {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 24px;
+            padding: 30px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -40%; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-banner h1 { font-size: 28px; font-weight: 800; color: #ffd700; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(255,215,0,0.3); }
+        .hero-banner p { font-size: 14px; color: #cbd5e1; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+        /* Titles */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #f97316;
+            padding-left: 12px;
+            margin-top: 10px;
+        }
+
+        /* Cartes des Primes */
+        .prizes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .prize-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .prize-card:hover { transform: translateY(-4px); }
+
+        .prize-card.weekly { border-color: rgba(56, 189, 248, 0.4); }
+        .prize-card.monthly { border-color: rgba(255, 215, 0, 0.5); background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(30,27,75,0.6)); }
+
+        .prize-badge {
+            align-self: flex-start;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+        .badge-gold { background: rgba(250, 204, 21, 0.2); color: #facc15; border: 1px solid #facc15; }
+
+        .prize-list { display: flex; flex-direction: column; gap: 12px; margin-top: 5px; }
+        .prize-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .prize-rank { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+        .prize-amount { font-weight: 800; font-size: 16px; color: #4ade80; }
+
+        /* Panneau d'Alerte Règlements */
+        .rules-alert-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .rules-alert-box i { font-size: 28px; color: #ef4444; flex-shrink: 0; margin-top: 2px; }
+        .rules-alert-box h3 { font-size: 16px; font-weight: 700; color: #fca5a5; margin-bottom: 6px; }
+        .rules-alert-box p { font-size: 13px; color: #fecdd3; line-height: 1.5; }
+
+        /* Explications Logique du Jeu */
+        .gameplay-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
+        }
+
+        .gameplay-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .gameplay-card h4 { font-size: 15px; color: #facc15; display: flex; align-items: center; gap: 8px; }
+        .gameplay-card p { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+        .star-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+        /* Action Footer */
+        .footer-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-play {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #fff;
+            padding: 14px 30px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-play:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(249, 115, 22, 0.6); }
+
+        .btn-ranking {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 25px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-ranking:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.03); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Navigation -->
+        <div class="nav-bar">
+            <a href="dashboard_principal.html" class="btn-back"><i class="fas fa-arrow-left"></i> Tableau de bord</a>
+            <span style="font-size: 13px; color: #94a3b8; font-weight: 600;"><i class="fas fa-shield-alt" style="color:#facc15;"></i> Règlement Officiel</span>
+        </div>
+
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <h1><i class="fas fa-trophy"></i> Guide & Primes VIP</h1>
+            <p>Découvrez comment accumuler des points dans le jeu <strong>Flight 3D</strong>, dominer le classement et remporter des primes hebdomadaires & mensuelles réelles !</p>
+        </div>
+
+        <!-- SECTION PRIMES & RÉCOMPENSES -->
+        <div class="section-title"><i class="fas fa-gift" style="color: #f97316;"></i> Grille des Récompenses</div>
+
+        <div class="prizes-grid">
+            <!-- Prime Semaine -->
+            <div class="prize-card weekly">
+                <span class="prize-badge badge-blue"><i class="fas fa-calendar-week"></i> Récompense Hebdomadaire</span>
+                <h3>Chaque Fin de Semaine</h3>
+                <p style="font-size: 12px; color: #94a3b8;">Récompensera le joueur classé <strong>1er du classement hebdomadaire</strong>.</p>
+                <div class="prize-list">
+                    <div class="prize-item">
+                        <div class="prize-rank">
+                            <i class="fas fa-crown" style="color: #ffd700;"></i> 1er Place
+                        </div>
+                        <div class="prize-amount">600 HTG</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 8px 10px; border-radius: 8px; line-height: 1.4;">
+                    <i class="fas fa-info-circle"></i> <strong>Note :</strong> Crédité directement sur le compte téléphonique <strong>Natcom</strong> du joueur (pour appels, paquets internet, etc.). <em>Non transférable par Natcash.</em>
+                </div>
+            </div>
+
+            <!-- Prime Mois -->
+            <div class="prize-card monthly">
+                <span class="prize-badge badge-gold"><i class="fas fa-medal"></i> Grand Prix Mensuel</span>
+                <h3>Chaque Début de Mois</h3>
+                <p style="font-size: 12px; color: #cbd5e1;">Les <strong>3 meilleurs joueurs</strong> du mois reçoivent du cash directement par <strong>Natcash</strong> !</p>
+                <div class="prize-list">
+                    <div class="prize-item">
+                        <div class="prize-rank"><i class="fas fa-trophy" style="color: #ffd700;"></i> 1er Gagnant</div>
+                        <div class="prize-amount" style="color: #ffd700;">6 000 HTG</div>
+                    </div>
+                    <div class="prize-item">
+                        <div class="prize-rank"><i class="fas fa-certificate" style="color: #c0c0c0;"></i> 2ème Gagnant</div>
+                        <div class="prize-amount" style="color: #e2e8f0;">3 000 HTG</div>
+                    </div>
+                    <div class="prize-item">
+                        <div class="prize-rank"><i class="fas fa-award" style="color: #cd7f32;"></i> 3ème Gagnant</div>
+                        <div class="prize-amount" style="color: #f87171;">1 500 HTG</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #facc15; background: rgba(250, 204, 21, 0.1); padding: 8px 10px; border-radius: 8px; line-height: 1.4;">
+                    <i class="fas fa-wallet"></i> <strong>Note :</strong> Crédité directement par transfert <strong>Natcash</strong> le 3ème jour du mois.
+                </div>
+            </div>
+        </div>
+
+        <!-- RÈGLE STRICTE DES APPELS -->
+        <div class="rules-alert-box">
+            <i class="fas fa-phone-slash"></i>
+            <div>
+                <h3>Modalités de Paiement & Règle des 3 Appels</h3>
+                <p>
+                    Le <strong>3ème jour de chaque mois</strong>, l'administrateur passe un appel direct au numéro de téléphone enregistré sur le compte du joueur gagnant pour confirmer et envoyer le montant Natcash.<br><br>
+                    <strong style="color: #ef4444;">⚠️ Attention :</strong> En cas de <strong>3 appels manqués (sans réponse)</strong>, l'administrateur sera dans l'obligation d'annuler le lot du joueur absent. 
+                    Le 2ème prendra alors la 1ère place, le 3ème prendra la 2ème place, et ainsi de suite ! Assurez-vous d'avoir votre téléphone joignable.
+                </p>
+            </div>
+        </div>
+
+        <!-- SECTION LOGIQUE DU JEU -->
+        <div class="section-title"><i class="fas fa-gamepad" style="color: #f97316;"></i> Logique & Règles du Jeu Flight 3D</div>
+
+        <div class="gameplay-grid">
+            <!-- Crédit Partie -->
+            <div class="gameplay-card">
+                <h4><i class="fas fa-ticket-alt"></i> Crédit de Jeu</h4>
+                <p>Chaque fois que vous lancez une volée d'essai ou une compétition, <strong>1 partie</strong> est déduite de votre solde. Si votre solde est épuisé, vous devez recharger vos parties pour continuer à participer.</p>
+            </div>
+
+            <!-- Collecte d'Étoiles -->
+            <div class="gameplay-card">
+                <h4><i class="fas fa-star"></i> Valeur des Étoiles</h4>
+                <p>Survolez et attrapez les étoiles pendant le vol pour accumuler des points :</p>
+                <div class="star-item">
+                    <span><i class="dot" style="background:#facc15;"></i> Étoile Jaune</span>
+                    <span style="color:#facc15;">+5 Pts</span>
+                </div>
+                <div class="star-item">
+                    <span><i class="dot" style="background:#ef4444;"></i> Étoile Rouge</span>
+                    <span style="color:#ef4444;">+9 Pts</span>
+                </div>
+                <div class="star-item">
+                    <span><i class="dot" style="background:#4ade80;"></i> Étoile Verte</span>
+                    <span style="color:#4ade80;">+15 Pts</span>
+                </div>
+            </div>
+
+            <!-- Obstacles Immeubles -->
+            <div class="gameplay-card">
+                <h4><i class="fas fa-building"></i> Immeubles 3D</h4>
+                <p>Manoeuvrez avec précision ! Si votre avion percute la structure d'un immeuble en haut ou en bas, la partie s'arrête immédiatement et seuls les points déjà collectés seront conservés.</p>
+            </div>
+
+            <!-- Bonus Turbo -->
+            <div class="gameplay-card">
+                <h4><i class="fas fa-bolt"></i> Bonus Turbo ⚡</h4>
+                <p>Attrapez les icônes d'éclair sur votre trajectoire pour activer le mode <strong>TURBO</strong> pendant 3.5 secondes, accélérant votre avion pour franchir plus rapidement les obstacles !</p>
+            </div>
+        </div>
+
+        <!-- Boutons d'Action -->
+        <div class="footer-actions">
+            <a href="jeu_avion.html" class="btn-play"><i class="fas fa-plane-departure"></i> Jouer Maintenant</a>
+            <a href="classement.html" class="btn-ranking"><i class="fas fa-trophy"></i> Voir le Classement</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

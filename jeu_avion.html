@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Challenge VIP - Flight 3D Réaliste</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #090d16;
+            color: #ffffff;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Alerte Mode Portrait (Mobile) */
+        #orientation-alert {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #0f172a; z-index: 9999; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
+        }
+        #orientation-alert i { font-size: 50px; color: #f97316; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
+        @keyframes rotatePhone { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
+
+        /* Conteneur du Jeu */
+        #game-container {
+            position: relative; width: 100%; max-width: 900px; height: 100vh; max-height: 500px;
+            background: linear-gradient(135deg, #0a0f1d, #1e1b4b, #090d16);
+            overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+            border-radius: 16px; border: 1px solid rgba(255,215,0,0.2);
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* HUD (Score & Informations) */
+        .hud {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none; font-weight: 700; font-size: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .hud-left, .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
+        .hud-item { 
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); 
+            padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .hud-btn {
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 40px; height: 40px; 
+            border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; cursor: pointer; transition: all 0.2s; font-size: 15px; text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .hud-btn:hover { background: #f97316; border-color: #f97316; transform: scale(1.1); }
+
+        /* Joystick Virtuel (Mobile) */
+        #joystick-zone {
+            position: absolute; bottom: 20px; left: 20px; width: 120px; height: 120px;
+            background: rgba(255, 255, 255, 0.05); border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.2); backdrop-filter: blur(5px);
+            display: none; touch-action: none; z-index: 5;
+        }
+        #joystick-knob {
+            position: absolute; top: 35px; left: 35px; width: 50px; height: 50px;
+            background: linear-gradient(135deg, #f97316, #ea580c); border-radius: 50%; 
+            box-shadow: 0 4px 15px rgba(249,115,22,0.6);
+            pointer-events: none; transition: transform 0.05s linear;
+        }
+
+        /* Écrans Overlay */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; text-align: center; padding: 20px;
+        }
+        .overlay h1 { font-size: 28px; color: #ffd700; margin-bottom: 10px; text-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+        .overlay p { color: #94a3b8; font-size: 14px; margin-bottom: 25px; max-width: 400px; line-height: 1.5; }
+        
+        .btn-group { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; border: none; padding: 12px 25px;
+            font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.5); transition: all 0.3s;
+            font-family: 'Poppins', sans-serif; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #fb923c, #f97316); transform: scale(1.05); box-shadow: 0 6px 20px rgba(249, 115, 22, 0.7); }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 12px 25px;
+            font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.3s;
+            font-family: 'Poppins', sans-serif; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
+
+        .legend { display: flex; gap: 15px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; }
+        .legend span { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <!-- Alerte Rotation Mobile -->
+    <div id="orientation-alert">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Veuillez tourner votre téléphone</h2>
+        <p>Ce jeu nécessite le mode paysage (horizontal) pour une meilleure expérience.</p>
+    </div>
+
+    <!-- Conteneur Principal du Jeu -->
+    <div id="game-container">
+        
+        <!-- Écran de Démarrage -->
+        <div id="start-screen" class="overlay">
+            <h1><i class="fas fa-plane-departure" style="color: #ffd700;"></i> Challenge VIP Flight 3D</h1>
+            <p>Esquive les gratte-ciels 3D et attrape un maximum d'étoiles !<br><strong style="color: #4ade80;">Parties disponibles : <span id="parties-count">0</span></strong></p>
+            <div class="legend">
+                <span><i class="dot" style="background:#facc15; box-shadow: 0 0 8px #facc15;"></i> Jaunes = 5 Pts</span>
+                <span><i class="dot" style="background:#ef4444; box-shadow: 0 0 10px #ef4444;"></i> Rouges = 9 Pts</span>
+                <span><i class="dot" style="background:#4ade80; box-shadow: 0 0 10px #4ade80;"></i> Vertes = 15 Pts</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" id="btn-jouer-principal" onclick="tenterLancerJeu()">Jouer (1 Partie) ✈️</button>
+                <a href="dashboard_principal.html" class="btn-secondary"><i class="fas fa-home"></i> Accueil</a>
+            </div>
+        </div>
+
+        <!-- Écran Pause -->
+        <div id="pause-screen" class="overlay" style="display: none;">
+            <h1><i class="fas fa-pause-circle" style="color: #facc15;"></i> Jeu en Pause</h1>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="reprendreJeu()">Reprendre 🎮</button>
+                <a href="dashboard_principal.html" class="btn-secondary">Accueil 🚪</a>
+            </div>
+        </div>
+
+        <!-- Écran Fin de Partie -->
+        <div id="gameover-screen" class="overlay" style="display: none;">
+            <h1 id="end-title">Partie Terminée</h1>
+            <p id="end-score-text">Points récoltés : 0</p>
+            <div class="btn-group">
+                <button class="btn-primary" id="btn-rejouer" onclick="tenterLancerJeu()"><i class="fas fa-redo"></i> Rejouer</button>
+                <a href="dashboard_principal.html" class="btn-secondary"><i class="fas fa-home"></i> Accueil</a>
+            </div>
+        </div>
+
+        <!-- HUD en jeu -->
+        <div class="hud" id="hud" style="display: none;">
+            <div class="hud-left">
+                <div class="hud-item"><i class="fas fa-star" style="color: #facc15;"></i> <span id="score-val">0</span> Pts</div>
+                <div class="hud-item" id="boost-status" style="display: none; color: #facc15;"><i class="fas fa-bolt"></i> TURBO ⚡</div>
+            </div>
+            <div class="hud-right">
+                <button class="hud-btn" onclick="mettreEnPause()" title="Pause"><i class="fas fa-pause"></i></button>
+                <a href="dashboard_principal.html" class="hud-btn" title="Quitter"><i class="fas fa-times"></i></a>
+            </div>
+        </div>
+
+        <!-- Joystick Tactile -->
+        <div id="joystick-zone">
+            <div id="joystick-knob"></div>
+        </div>
+
+        <!-- Canvas -->
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = 900;
+        canvas.height = 500;
+
+        let jeuActif = false;
+        let enPause = false;
+        let score = 0;
+        let vitesseJeu = 2.5;
+        let vitesseBoost = 1;
+        let tempsBoostRestant = 0;
+        let distanceParcourue = 0;
+        let positionLigneArrivee = 0;
+
+        let avion = { x: 120, y: 250, largeur: 55, hauteur: 28, angle: 0 };
+        const touches = { up: false, down: false, left: false, right: false };
+        let immeubles = [];
+        let etoiles = [];
+        let eclairs = [];
+        let particules = [];
+
+        // --- SYNCHRONISATION EXACTE AVEC DASHBOARD.HTML ---
+        function chargerDonneesJoueur() {
+            const phone = localStorage.getItem('vip_user_phone') || '+509 00000000';
+            const currentUser = JSON.parse(localStorage.getItem('current_user')) || {};
+            const userEmail = currentUser.email || phone;
+            const userKey = 'vip_persistent_data_' + userEmail.replace(/[@\s.]/g, '_');
+
+            let savedData = JSON.parse(localStorage.getItem(userKey));
+            if (!savedData) {
+                let cleanPhone = phone.replace(/\s+/g, '');
+                let oldDashboardData = JSON.parse(localStorage.getItem('vip_data_' + cleanPhone)) || { parties: currentUser.parties || 0 };
+                savedData = {
+                    points: 0,
+                    parties: oldDashboardData.parties !== undefined ? oldDashboardData.parties : 0,
+                    email: userEmail,
+                    phone: phone
+                };
+                localStorage.setItem(userKey, JSON.stringify(savedData));
+            }
+            return { userKey, data: savedData };
+        }
+
+        function rafraichirAffichageParties() {
+            const { data } = chargerDonneesJoueur();
+            document.getElementById('parties-count').innerText = data.parties;
+        }
+
+        rafraichirAffichageParties();
+
+        function verifierOrientation() {
+            if (window.innerHeight > window.innerWidth && window.innerWidth < 800) {
+                document.getElementById('orientation-alert').style.display = 'flex';
+            } else {
+                document.getElementById('orientation-alert').style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', verifierOrientation);
+        window.addEventListener('orientationchange', verifierOrientation);
+        verifierOrientation();
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') touches.up = true;
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') touches.down = true;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') touches.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') touches.right = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') touches.up = false;
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') touches.down = false;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') touches.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') touches.right = false;
+        });
+
+        const zoneJoystick = document.getElementById('joystick-zone');
+        const knob = document.getElementById('joystick-knob');
+        let touchId = null;
+
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            zoneJoystick.style.display = 'block';
+        }
+
+        zoneJoystick.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            touchId = touch.identifier;
+            gererJoystick(touch);
+        });
+
+        zoneJoystick.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === touchId) {
+                    gererJoystick(e.changedTouches[i]);
+                }
+            }
+        });
+
+        zoneJoystick.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchId = null;
+            knob.style.transform = `translate(0px, 0px)`;
+            touches.up = false; touches.down = false;
+        });
+
+        function gererJoystick(touch) {
+            const rect = zoneJoystick.getBoundingClientRect();
+            let deltaX = touch.clientX - (rect.left + rect.width / 2);
+            let deltaY = touch.clientY - (rect.top + rect.height / 2);
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const rayonMax = 40;
+
+            if (distance > rayonMax) {
+                deltaX = (deltaX / distance) * rayonMax;
+                deltaY = (deltaY / distance) * rayonMax;
+            }
+            knob.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            touches.up = (deltaY / rayonMax) < -0.3;
+            touches.down = (deltaY / rayonMax) > 0.3;
+        }
+
+        function tenterLancerJeu() {
+            const { userKey, data } = chargerDonneesJoueur();
+
+            if (data.parties <= 0) {
+                alert("⚠️ Vous n'avez plus de parties ! Rechargez votre compte.");
+                window.location.href = "acheter_parties.html";
+            } else {
+                // Déduire une partie et sauvegarder immédiatement
+                data.parties -= 1;
+                localStorage.setItem(userKey, JSON.stringify(data));
+                rafraichirAffichageParties();
+                lancerJeuEffectif();
+            }
+        }
+
+        function lancerJeuEffectif() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('gameover-screen').style.display = 'none';
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
+
+            score = 0;
+            distanceParcourue = 0;
+            vitesseBoost = 1;
+            tempsBoostRestant = 0;
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('boost-status').style.display = 'none';
+
+            avion.y = 250;
+            avion.x = 120;
+            avion.angle = 0;
+            immeubles = [];
+            etoiles = [];
+            eclairs = [];
+            particules = [];
+
+            genererNiveauImprevisible();
+
+            jeuActif = true;
+            enPause = false;
+            derniereAnimation = Date.now();
+            requestAnimationFrame(boucleDeJeu);
+        }
+
+        function genererNiveauImprevisible() {
+            let posX = 600;
+            const sequenceValeurs = [15, 5, 9, 15, 5, 9, 15, 5, 15, 9, 5, 15, 9, 15, 5, 9, 15, 5, 9, 15];
+            
+            for (let i = 0; i < sequenceValeurs.length; i++) {
+                let val = sequenceValeurs[i];
+                let couleur = '#facc15';
+                if (val === 15) couleur = '#4ade80';
+                if (val === 9) couleur = '#ef4444';
+
+                let estEnHaut = Math.random() < 0.5;
+                let hauteurImmeuble = 70 + Math.random() * 100;
+
+                let fenetres = [];
+                for(let f = 0; f < 4; f++) {
+                    fenetres.push({
+                        xOffset: 10 + Math.random() * 30,
+                        yOffset: 15 + f * 25,
+                        allumee: Math.random() > 0.3
+                    });
+                }
+
+                immeubles.push({
+                    x: posX,
+                    y: estEnHaut ? 0 : canvas.height - hauteurImmeuble,
+                    largeur: 55 + Math.random() * 35,
+                    hauteur: hauteurImmeuble,
+                    fenetres: fenetres
+                });
+
+                let posYMin = estEnHaut ? hauteurImmeuble + 35 : 60;
+                let posYMax = estEnHaut ? canvas.height - 80 : (canvas.height - hauteurImmeuble) - 40;
+                let posYAleatoire = posYMin + Math.random() * Math.max(10, (posYMax - posYMin));
+
+                etoiles.push({
+                    x: posX + 60,
+                    y: posYAleatoire,
+                    rayon: 12,
+                    valeur: val,
+                    couleur: couleur,
+                    recuperee: false,
+                    pulsation: Math.random() * Math.PI
+                });
+
+                if (Math.random() < 0.25) {
+                    eclairs.push({
+                        x: posX + 30,
+                        y: 120 + Math.random() * 260,
+                        recupere: false
+                    });
+                }
+
+                posX += 240 + Math.random() * 110;
+            }
+
+            positionLigneArrivee = posX + 100;
+        }
+
+        function mettreEnPause() {
+            if (!jeuActif) return;
+            enPause = true;
+            document.getElementById('pause-screen').style.display = 'flex';
+        }
+
+        function reprendreJeu() {
+            enPause = false;
+            document.getElementById('pause-screen').style.display = 'none';
+            derniereAnimation = Date.now();
+            requestAnimationFrame(boucleDeJeu);
+        }
+
+        let derniereAnimation = Date.now();
+        function boucleDeJeu() {
+            if (!jeuActif || enPause) return;
+
+            const maintenant = Date.now();
+            const delta = (maintenant - derniereAnimation) / 1000;
+            derniereAnimation = maintenant;
+
+            let vitesseActuelleMouvement = 4 * vitesseBoost;
+            if (touches.up) {
+                avion.y -= vitesseActuelleMouvement;
+                avion.angle = -0.15;
+            } else if (touches.down) {
+                avion.y += vitesseActuelleMouvement;
+                avion.angle = 0.15;
+            } else {
+                avion.angle *= 0.9;
+            }
+
+            if (touches.left && avion.x > 50) avion.x -= 2.5;
+            if (touches.right && avion.x < 320) avion.x += 2.5;
+
+            const margeVitre = 45;
+            if (avion.y < margeVitre) avion.y = margeVitre;
+            if (avion.y > canvas.height - avion.hauteur - margeVitre) {
+                avion.y = canvas.height - avion.hauteur - margeVitre;
+            }
+
+            if (Math.random() < 0.8) {
+                particules.push({
+                    x: avion.x - 5,
+                    y: avion.y + avion.hauteur / 2 + (Math.random() * 4 - 2),
+                    vx: -3 - Math.random() * 2,
+                    vy: (Math.random() - 0.5) * 1,
+                    taille: 3 + Math.random() * 4,
+                    alpha: 0.7
+                });
+            }
+
+            particules.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.04;
+            });
+            particules = particules.filter(p => p.alpha > 0);
+
+            if (tempsBoostRestant > 0) {
+                tempsBoostRestant -= delta;
+                if (tempsBoostRestant <= 0) {
+                    vitesseBoost = 1;
+                    document.getElementById('boost-status').style.display = 'none';
+                }
+            }
+
+            let vitesseDefilement = (vitesseJeu * 1.4) * vitesseBoost;
+            distanceParcourue += vitesseDefilement;
+
+            immeubles.forEach(imb => imb.x -= vitesseDefilement);
+            etoiles.forEach(et => {
+                et.x -= vitesseDefilement;
+                et.pulsation += 0.1;
+            });
+            eclairs.forEach(ec => ec.x -= vitesseDefilement);
+            positionLigneArrivee -= vitesseDefilement;
+
+            immeubles.forEach(imb => {
+                if (
+                    avion.x < imb.x + imb.largeur &&
+                    avion.x + avion.largeur > imb.x &&
+                    avion.y < imb.y + imb.hauteur &&
+                    avion.y + avion.hauteur > imb.y
+                ) {
+                    terminerPartie(false, "💥 Oups ! Collision avec un immeuble");
+                }
+            });
+
+            etoiles.forEach(et => {
+                if (!et.recuperee) {
+                    let distanceX = (avion.x + avion.largeur / 2) - et.x;
+                    let distanceY = (avion.y + avion.hauteur / 2) - et.y;
+                    if (Math.sqrt(distanceX * distanceX + distanceY * distanceY) < et.rayon + 18) {
+                        et.recuperee = true;
+                        score += et.valeur;
+                        document.getElementById('score-val').innerText = score;
+                    }
+                }
+            });
+
+            eclairs.forEach(ec => {
+                if (!ec.recupere) {
+                    let distanceX = (avion.x + avion.largeur / 2) - ec.x;
+                    let distanceY = (avion.y + avion.hauteur / 2) - ec.y;
+                    if (Math.sqrt(distanceX * distanceX + distanceY * distanceY) < 28) {
+                        ec.recupere = true;
+                        vitesseBoost = 1.6;
+                        tempsBoostRestant = 3.5;
+                        document.getElementById('boost-status').style.display = 'block';
+                    }
+                }
+            });
+
+            if (avion.x >= positionLigneArrivee) {
+                terminerPartie(true, "🏁 Ligne d'arrivée franchie avec succès !");
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = "rgba(255, 215, 0, 0.4)";
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "rgba(255, 215, 0, 0.5)";
+            ctx.beginPath();
+            ctx.moveTo(0, margeVitre); ctx.lineTo(canvas.width, margeVitre);
+            ctx.moveTo(0, canvas.height - margeVitre); ctx.lineTo(canvas.width, canvas.height - margeVitre);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            immeubles.forEach(imb => {
+                let gradientImmeuble = ctx.createLinearGradient(imb.x, imb.y, imb.x + imb.largeur, imb.y);
+                gradientImmeuble.addColorStop(0, "#0f172a");
+                gradientImmeuble.addColorStop(0.7, "#1e293b");
+                gradientImmeuble.addColorStop(1, "#090d16");
+
+                ctx.fillStyle = gradientImmeuble;
+                ctx.fillRect(imb.x, imb.y, imb.largeur, imb.hauteur);
+                
+                ctx.strokeStyle = "#334155";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(imb.x, imb.y, imb.largeur, imb.hauteur);
+
+                imb.fenetres.forEach(f => {
+                    ctx.fillStyle = f.allumee ? "rgba(250, 204, 21, 0.7)" : "rgba(51, 65, 85, 0.4)";
+                    if(f.allumee) {
+                        ctx.shadowBlur = 4;
+                        ctx.shadowColor = "#facc15";
+                    }
+                    ctx.fillRect(imb.x + f.xOffset, imb.y + f.yOffset, 6, 10);
+                    ctx.shadowBlur = 0;
+                });
+            });
+
+            particules.forEach(p => {
+                ctx.fillStyle = `rgba(249, 115, 22, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.taille, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            etoiles.forEach(et => {
+                if (!et.recuperee) {
+                    let taillePulsation = et.rayon + Math.sin(et.pulsation) * 2;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(et.x, et.y, taillePulsation, 0, Math.PI * 2);
+                    ctx.fillStyle = et.couleur;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = et.couleur;
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.restore();
+                }
+            });
+
+            eclairs.forEach(ec => {
+                if (!ec.recupere) {
+                    ctx.save();
+                    ctx.font = "22px FontAwesome";
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = "#facc15";
+                    ctx.fillText("⚡", ec.x - 10, ec.y + 8);
+                    ctx.restore();
+                }
+            });
+
+            ctx.strokeStyle = "#4ade80";
+            ctx.lineWidth = 8;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#4ade80";
+            ctx.setLineDash([12, 12]);
+            ctx.beginPath();
+            ctx.moveTo(positionLigneArrivee, margeVitre);
+            ctx.lineTo(positionLigneArrivee, canvas.height - margeVitre);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.shadowBlur = 0;
+
+            ctx.save();
+            ctx.translate(avion.x + avion.largeur / 2, avion.y + avion.hauteur / 2);
+            ctx.rotate(avion.angle);
+
+            let gradientAvion = ctx.createLinearGradient(-avion.largeur/2, -avion.hauteur/2, avion.largeur/2, avion.hauteur/2);
+            gradientAvion.addColorStop(0, "#f97316");
+            gradientAvion.addColorStop(1, "#c2410c");
+
+            ctx.fillStyle = gradientAvion;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = "rgba(249, 115, 22, 0.7)";
+            
+            ctx.beginPath();
+            ctx.ellipse(0, 0, avion.largeur / 2, avion.hauteur / 2.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(avion.largeur / 2 - 5, 0);
+            ctx.lineTo(avion.largeur / 2 + 10, -3);
+            ctx.lineTo(avion.largeur / 2 + 10, 3);
+            ctx.closePath();
+            ctx.fillStyle = "#ffedd5";
+            ctx.fill();
+
+            ctx.fillStyle = "#9a3412";
+            ctx.beginPath();
+            ctx.moveTo(-5, -avion.hauteur / 2);
+            ctx.lineTo(10, -avion.hauteur / 1.2);
+            ctx.lineTo(18, -avion.hauteur / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(-5, avion.hauteur / 2);
+            ctx.lineTo(10, avion.hauteur / 1.2);
+            ctx.lineTo(18, avion.hauteur / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#38bdf8";
+            ctx.beginPath();
+            ctx.ellipse(8, -2, 7, 4, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            requestAnimationFrame(boucleDeJeu);
+        }
+
+        function terminerPartie(victoire, messageTitre) {
+            jeuActif = false;
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('gameover-screen').style.display = 'flex';
+
+            document.getElementById('end-title').innerHTML = messageTitre;
+            document.getElementById('end-title').style.color = victoire ? "#4ade80" : "#ef4444";
+            
+            document.getElementById('end-score-text').innerHTML = `Points récoltés : <strong>${score} Pts</strong><br>Ajoutés à votre tableau de bord !`;
+
+            sauvegarderScoreEtQuitter(score);
+        }
+
+        function sauvegarderScoreEtQuitter(pointsFinaux) {
+            const { userKey, data } = chargerDonneesJoueur();
+            
+            // Ajouter les points et sauvegarder dans la clé persistante du Dashboard
+            data.points += pointsFinaux;
+            localStorage.setItem(userKey, JSON.stringify(data));
+
+            // Mise à jour du classement général
+            let classement = JSON.parse(localStorage.getItem('challenge_vip_classement')) || [];
+            let index = classement.findIndex(j => j.phone === data.phone || j.email === data.email);
+            if (index !== -1) {
+                classement[index].points = data.points;
+            } else {
+                classement.push({ id: data.phone, phone: data.phone, email: data.email, points: data.points });
+            }
+            classement.sort((a, b) => b.points - a.points);
+            localStorage.setItem('challenge_vip_classement', JSON.stringify(classement));
+        }
+    </script>
+</body>
+</html>

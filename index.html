@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge VIP - Connexion & Inscription</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(15, 15, 25, 0.8), rgba(15, 15, 25, 0.9)), 
+                        url('images/fond_jeu.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(30, 30, 50, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+        }
+        #admin-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        #admin-btn:hover {
+            background: #ffd700;
+            color: #111;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        h2 {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            color: #ffd700;
+            font-size: 26px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #ddd;
+            letter-spacing: 0.5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(15, 15, 25, 0.6);
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+            background: rgba(15, 15, 25, 0.8);
+        }
+        button.action-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700, #e6c200);
+            border: none;
+            border-radius: 8px;
+            color: #111;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button.action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, #ffe44d, #ffd700);
+        }
+        
+        .whatsapp-section {
+            margin-top: 25px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+        .whatsapp-section p {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 12px;
+        }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        .whatsapp-btn:hover {
+            background: #20ba5a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+        }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.92);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .admin-content {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(30, 30, 45, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+        }
+        .close-admin {
+            background: #ff4d4d;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            float: right;
+            transition: 0.3s;
+        }
+        .close-admin:hover {
+            background: #ff1a1a;
+        }
+        .admin-content h3 {
+            color: #ffd700;
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .admin-content h4 {
+            color: #fff;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: rgba(15, 15, 25, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px dashed rgba(255, 215, 0, 0.4);
+        }
+        .stat-card span {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: rgba(20, 20, 35, 0.9);
+            color: #ffd700;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        td {
+            background: rgba(15, 15, 25, 0.4);
+        }
+        .delete-btn {
+            background: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .delete-btn:hover {
+            background: #ff1a1a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button id="admin-btn" onclick="openAdmin()">ADMIN</button>
+        <h2>Challenge VIP</h2>
+
+        <!-- Formulaire de Connexion -->
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="login-email" required placeholder="Entrez votre e-mail">
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" id="login-password" required placeholder="Votre mot de passe">
+            </div>
+            <button type="submit" class="action-btn">Se connecter</button>
+        </form>
+
+        <div class="whatsapp-section">
+            <p>Pas encore de compte VIP ? Obtenez votre accès dès maintenant !</p>
+            <a href="https://wa.me/50940267913?text=Bonjour,%20je%20veux%20payer%20mes%20250G%20via%20Natcash%20pour%20obtenir%20mon%20compte%20Challenge%20VIP." target="_blank" class="whatsapp-btn">
+                💬 S'inscrire via WhatsApp (Natcash)
+            </a>
+        </div>
+    </div>
+
+    <!-- Panneau Administrateur -->
+    <div id="admin-panel">
+        <div class="admin-content">
+            <button class="close-admin" onclick="closeAdmin()">Fermer</button>
+            <h3>Panneau Administrateur</h3>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    Total Inscriptions
+                    <span id="total-users">0</span>
+                </div>
+                <div class="stat-card">
+                    Chiffre d'Affaires
+                    <span><span id="total-revenue">0</span> G</span>
+                </div>
+            </div>
+
+            <!-- SECTION : AJOUTER DES POINTS / PARTIES À UN JOUEUR EXISTANT -->
+            <h4 style="color: #4ade80; border-color: #4ade80;">Ajouter des parties à un joueur existant</h4>
+            <form id="add-points-form" onsubmit="adminAddPoints(event)">
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 2;">
+                        <label>E-mail ou Téléphone du joueur</label>
+                        <input type="text" id="target-user-identifier" required placeholder="email@gmail.com ou +509...">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Parties à ajouter</label>
+                        <input type="number" id="parties-to-add" min="1" required placeholder="Ex: 100">
+                    </div>
+                </div>
+                <button type="submit" class="action-btn" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;">Créditer les parties instantanément</button>
+            </form>
+
+            <h4>Ajouter un nouveau joueur</h4>
+            <form id="add-user-form" onsubmit="initAddUser(event)">
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>E-mail du joueur</label>
+                        <input type="email" id="admin-email" required placeholder="email@gmail.com">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Mot de passe</label>
+                        <input type="text" id="admin-password" required placeholder="Mot de passe">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Numéro WhatsApp / Natcom</label>
+                        <input type="text" id="admin-phone" required placeholder="+509 ...">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Parties initiales</label>
+                        <input type="number" id="admin-points" value="0" required>
+                    </div>
+                </div>
+                <button type="submit" class="action-btn">Générer le code de vérification</button>
+            </form>
+
+            <!-- Étape de validation du code -->
+            <div id="verify-section" style="display: none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px dashed #ffd700;">
+                <h4 style="margin-top:0; color: #ffd700;">Vérification de sécurité</h4>
+                <p id="code-display-msg" style="font-size: 13px; margin-bottom: 12px; color: #fff;"></p>
+                <div class="form-group">
+                    <label>Entrez le code pour confirmer</label>
+                    <input type="text" id="verification-code-input" placeholder="Ex: 482910">
+                </div>
+                <button type="button" class="action-btn" onclick="confirmAddUser()">Valider et Enregistrer</button>
+            </div>
+
+            <h4>Liste des Joueurs Inscrits</h4>
+            <div style="max-height: 200px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>E-mail</th>
+                            <th>Téléphone</th>
+                            <th>Parties</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ENCRYPTED_ADMIN_CODE = "NDM0MjI5MTBBQkM="; 
+        const PRICE_PER_USER = 250; 
+        
+        let pendingUserData = null;
+        let generatedVerificationCode = "";
+
+        function verifyAdminCode(inputCode) {
+            try {
+                return btoa(inputCode) === ENCRYPTED_ADMIN_CODE;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function getUsers() {
+            let users = localStorage.getItem('vip_users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('vip_users', JSON.stringify(users));
+        }
+
+        function openAdmin() {
+            let code = prompt("Entrez le code secret administrateur :");
+            if (code !== null) {
+                if (verifyAdminCode(code)) {
+                    document.getElementById('admin-panel').style.display = 'block';
+                    loadAdminData();
+                } else {
+                    alert("Code secret incorrect !");
+                }
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('verify-section').style.display = 'none';
+        }
+
+        // FONCTION POUR AJOUTER DIRECTEMENT DES POINTS/PARTIES À UN JOUEUR EXISTANT
+        function adminAddPoints(event) {
+            event.preventDefault();
+            let identifier = document.getElementById('target-user-identifier').value.trim().toLowerCase();
+            let partiesToAdd = parseInt(document.getElementById('parties-to-add').value) || 0;
+
+            let users = getUsers();
+            let userIndex = users.findIndex(u => u.email.toLowerCase() === identifier || u.phone.toLowerCase() === identifier);
+
+            if (userIndex === -1) {
+                alert("Aucun joueur trouvé avec cet e-mail ou ce numéro !");
+                return;
+            }
+
+            // Mettre à jour les parties du joueur dans la liste globale
+            users[userIndex].parties = (parseInt(users[userIndex].parties) || 0) + partiesToAdd;
+            saveUsers(users);
+
+            // Mettre à jour la clé de persistance/dashboard du joueur pour synchronisation instantanée
+            let foundUser = users[userIndex];
+            let cleanPhone = foundUser.phone.replace(/\s+/g, '');
+            let userEmailKey = 'vip_persistent_data_' + foundUser.email.replace(/[@\s.]/g, '_');
+
+            // Récupérer et mettre à jour le dashboard data
+            let dashData = JSON.parse(localStorage.getItem('vip_data_' + cleanPhone)) || JSON.parse(localStorage.getItem('vip_data_' + foundUser.phone)) || { parties: 0, points: 0 };
+            dashData.parties = users[userIndex].parties;
+            
+            localStorage.setItem('vip_data_' + cleanPhone, JSON.stringify(dashData));
+            localStorage.setItem('vip_data_' + foundUser.phone, JSON.stringify(dashData));
+
+            // Mettre à jour le profil persistant global
+            let persistentData = JSON.parse(localStorage.getItem(userEmailKey)) || { points: 0 };
+            // On s'assure que si les parties sont gérées ici, elles se répercutent bien
+            persistentData.parties = users[userIndex].parties;
+            localStorage.setItem(userEmailKey, JSON.stringify(persistentData));
+
+            alert(`Succès ! ${partiesToAdd} parties ont été ajoutées à ${foundUser.email}. Total actuel : ${users[userIndex].parties} parties.`);
+            document.getElementById('add-points-form').reset();
+            loadAdminData();
+        }
+
+        function initAddUser(event) {
+            event.preventDefault();
+            let email = document.getElementById('admin-email').value.trim();
+            let password = document.getElementById('admin-password').value.trim();
+            let phone = document.getElementById('admin-phone').value.trim();
+            let initialParties = parseInt(document.getElementById('admin-points').value) || 0;
+
+            let users = getUsers();
+            if (users.some(u => u.email === email)) {
+                alert("Cet e-mail est déjà enregistré !");
+                return;
+            }
+
+            generatedVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            pendingUserData = { email, password, phone, parties: initialParties };
+
+            document.getElementById('code-display-msg').innerHTML = 
+                `Code généré pour <b>${email}</b> : <span style="font-size:18px; color:#ffd700; background:rgba(0,0,0,0.5); padding:2px 8px; border-radius:4px; letter-spacing:2px;">${generatedVerificationCode}</span><br><small style="color:#aaa;">(Transmettez ce code au joueur ou saisissez-le ci-dessous pour valider)</small>`;
+            
+            document.getElementById('verify-section').style.display = 'block';
+        }
+
+        function confirmAddUser() {
+            let userCode = document.getElementById('verification-code-input').value.trim();
+
+            if (userCode === generatedVerificationCode) {
+                let users = getUsers();
+                users.push(pendingUserData);
+                saveUsers(users);
+
+                let rawPhone = pendingUserData.phone.trim();
+                let cleanPhone = rawPhone.replace(/\s+/g, '');
+                
+                let initialDashboardData = {
+                    parties: pendingUserData.parties,
+                    points: 0
+                };
+                
+                localStorage.setItem('vip_data_' + cleanPhone, JSON.stringify(initialDashboardData));
+                localStorage.setItem('vip_data_' + rawPhone, JSON.stringify(initialDashboardData));
+
+                alert("Compte vérifié et enregistré avec succès !");
+                document.getElementById('add-user-form').reset();
+                document.getElementById('verification-code-input').value = "";
+                document.getElementById('verify-section').style.display = 'none';
+                pendingUserData = null;
+                generatedVerificationCode = "";
+                loadAdminData();
+            } else {
+                alert("Code de vérification incorrect. Veuillez réessayer.");
+            }
+        }
+
+        function loadAdminData() {
+            let users = getUsers();
+            let tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = "";
+
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">Aucun joueur inscrit pour le moment.</td></tr>`;
+            } else {
+                users.forEach((user, index) => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                        <td><strong>${user.parties}</strong></td>
+                        <td><button class="delete-btn" onclick="deleteUser(${index})">Supprimer</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('total-users').innerText = users.length;
+            document.getElementById('total-revenue').innerText = users.length * PRICE_PER_USER;
+        }
+
+        function deleteUser(index) {
+            if (confirm("Voulez-vous vraiment supprimer ce joueur ?")) {
+                let users = getUsers();
+                users.splice(index, 1);
+                saveUsers(users);
+                loadAdminData();
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            let email = document.getElementById('login-email').value.trim();
+            let password = document.getElementById('login-password').value.trim();
+
+            let users = getUsers();
+            let foundUser = users.find(u => u.email === email && u.password === password);
+
+            if (foundUser) {
+                localStorage.setItem('current_user', JSON.stringify(foundUser));
+                localStorage.setItem('vip_user_phone', foundUser.phone);
+
+                window.location.href = "dashboard_principal.html";
+            } else {
+                alert("Accès refusé : Cet e-mail n'est pas enregistré ou le mot de passe est incorrect.");
+            }
+        }
+    </script>
+</body>
+</html>
