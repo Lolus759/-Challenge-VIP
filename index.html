@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Challenge VIP - Connexion & Inscription</title>
+    <script>
+        // Vérification de sécurité : Rediriger vers la connexion si l'utilisateur n'est pas connecté
+if (!localStorage.getItem('vip_user_phone') && !localStorage.getItem('current_user')) {
+    window.location.href = "login.html";}
+    </script>
     <style>
         * {
             box-sizing: border-box;
