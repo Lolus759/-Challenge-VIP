@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Challenge VIP - Flight 3D Réaliste</title>
-    
-    <!-- Sécurité Anti-Accès Direct -->
-    <script>
-        if (!localStorage.getItem('vip_user_phone') && !localStorage.getItem('current_user')) {
-            window.location.href = "login.html";
-        }
-    </script>
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
@@ -39,7 +31,7 @@
         #orientation-alert i { font-size: 50px; color: #f97316; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
         @keyframes rotatePhone { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
 
-        /* Conteneur du Jeu (Responsive & Adapté sans dépassement) */
+        /* Conteneur du Jeu (Fixé pour ne jamais dépasser et responsive) */
         #game-container {
             position: relative; 
             width: 100vw; 
@@ -55,33 +47,15 @@
             justify-content: center;
             align-items: center;
         }
-        
-        /* Mode Plein Écran forcé propre */
-        #game-container.fullscreen-mode {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: none !important;
-            max-height: none !important;
-            border-radius: 0 !important;
-            z-index: 999999 !important;
-        }
 
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain;
-        }
+        canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
 
         /* HUD (Score & Informations) */
         .hud {
             position: absolute; top: 15px; left: 15px; right: 15px;
             display: flex; justify-content: space-between; align-items: center;
             pointer-events: none; font-weight: 700; font-size: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            z-index: 20;
+            z-index: 5;
         }
         .hud-left, .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
         .hud-item { 
@@ -139,7 +113,7 @@
         }
         .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
 
-        .legend { display: flex; gap: 15px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; }
+        .legend { display: flex; gap: 15px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; flex-wrap: wrap; justify-content: center; }
         .legend span { display: flex; align-items: center; gap: 5px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
     </style>
@@ -197,8 +171,7 @@
                 <div class="hud-item" id="boost-status" style="display: none; color: #facc15;"><i class="fas fa-bolt"></i> TURBO ⚡</div>
             </div>
             <div class="hud-right">
-                <button class="hud-btn" id="sound-btn" onclick="toggleSound()" title="Activer/Couper le son">📢</button>
-                <button class="hud-btn" id="fullscreen-btn" onclick="toggleFullScreen()" title="Plein écran">⛶</button>
+                <button class="hud-btn" onclick="basculerPleinEcran()" title="Plein écran"><i class="fas fa-expand"></i></button>
                 <button class="hud-btn" onclick="mettreEnPause()" title="Pause"><i class="fas fa-pause"></i></button>
                 <a href="dashboard_principal.html" class="hud-btn" title="Quitter"><i class="fas fa-times"></i></a>
             </div>
@@ -236,64 +209,83 @@
         let eclairs = [];
         let particules = [];
 
-        // --- GESTION AUDIO & EFFETS ---
-        let soundEnabled = true;
+        // --- GESTION AUDIO WEB API (Sons intégrés) ---
         let audioCtx = null;
 
-        function getAudioContext() {
+        function initialiserAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            return audioCtx;
         }
 
-        function playSound(type) {
-            if (!soundEnabled) return;
+        function jouerSon(type) {
             try {
-                const ac = getAudioContext();
-                const osc = ac.createOscillator();
-                const gain = ac.createGain();
-                osc.connect(gain);
-                gain.connect(ac.destination);
+                initialiserAudio();
+                if (!audioCtx) return;
 
-                if (type === 'star') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const maintenant = audioCtx.currentTime;
+
+                if (type === 'etoile') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587.33, ac.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(880, ac.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.3, ac.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 0.15);
-                    osc.start();
-                    osc.stop(ac.currentTime + 0.15);
-                } else if (type === 'boost') {
+                    osc.frequency.setValueAtTime(587.33, maintenant); // Ré5
+                    osc.frequency.exponentialRampToValueAtTime(880, maintenant + 0.15); // La5
+                    gain.gain.setValueAtTime(0.15, maintenant);
+                    gain.gain.linearRampToValueAtTime(0, maintenant + 0.15);
+                    osc.start(maintenant);
+                    osc.stop(maintenant + 0.15);
+                } else if (type === 'turbo') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(200, ac.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(600, ac.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.4, ac.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 0.25);
-                    osc.start();
-                    osc.stop(ac.currentTime + 0.25);
+                    osc.frequency.setValueAtTime(300, maintenant);
+                    osc.frequency.linearRampToValueAtTime(600, maintenant + 0.3);
+                    gain.gain.setValueAtTime(0.2, maintenant);
+                    gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);
+                    osc.start(maintenant);
+                    osc.stop(maintenant + 0.3);
+                } else if (type === 'crash') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, maintenant);
+                    osc.frequency.linearRampToValueAtTime(40, maintenant + 0.4);
+                    gain.gain.setValueAtTime(0.3, maintenant);
+                    gain.gain.linearRampToValueAtTime(0, maintenant + 0.4);
+                    osc.start(maintenant);
+                    osc.stop(maintenant + 0.4);
+                } else if (type === 'victoire') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, maintenant);
+                    osc.frequency.setValueAtTime(554.37, maintenant + 0.1);
+                    osc.frequency.setValueAtTime(659.25, maintenant + 0.2);
+                    osc.frequency.setValueAtTime(880, maintenant + 0.3);
+                    gain.gain.setValueAtTime(0.2, maintenant);
+                    gain.gain.linearRampToValueAtTime(0, maintenant + 0.6);
+                    osc.start(maintenant);
+                    osc.stop(maintenant + 0.6);
                 }
-            } catch (e) {
-                console.log("Audio non pris en charge ou bloqué", e);
+            } catch(e) {
+                console.log("Audio non pris en charge ou bloqué par le navigateur", e);
             }
         }
 
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('sound-btn').innerText = soundEnabled ? '📢' : '🔇';
-        }
-
-        function toggleFullScreen() {
+        // --- PLEIN ÉCRAN ---
+        function basculerPleinEcran() {
             const container = document.getElementById('game-container');
-            container.classList.toggle('fullscreen-mode');
-            const btn = document.getElementById('fullscreen-btn');
-            if (container.classList.contains('fullscreen-mode')) {
-                btn.innerHTML = '❌';
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                }
             } else {
-                btn.innerHTML = '⛶';
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
 
@@ -338,7 +330,6 @@
         verifierOrientation();
 
         window.addEventListener('keydown', (e) => {
-            getAudioContext();
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') touches.up = true;
             if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') touches.down = true;
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') touches.left = true;
@@ -361,7 +352,6 @@
 
         zoneJoystick.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            getAudioContext();
             const touch = e.changedTouches[0];
             touchId = touch.identifier;
             gererJoystick(touch);
@@ -400,7 +390,7 @@
         }
 
         function tenterLancerJeu() {
-            getAudioContext();
+            initialiserAudio();
             const { userKey, data } = chargerDonneesJoueur();
 
             if (data.parties <= 0) {
@@ -586,6 +576,7 @@
                     avion.y < imb.y + imb.hauteur &&
                     avion.y + avion.hauteur > imb.y
                 ) {
+                    jouerSon('crash');
                     terminerPartie(false, "💥 Oups ! Collision avec un immeuble");
                 }
             });
@@ -598,7 +589,7 @@
                         et.recuperee = true;
                         score += et.valeur;
                         document.getElementById('score-val').innerText = score;
-                        playSound('star');
+                        jouerSon('etoile');
                     }
                 }
             });
@@ -612,12 +603,13 @@
                         vitesseBoost = 1.6;
                         tempsBoostRestant = 3.5;
                         document.getElementById('boost-status').style.display = 'block';
-                        playSound('boost');
+                        jouerSon('turbo');
                     }
                 }
             });
 
             if (avion.x >= positionLigneArrivee) {
+                jouerSon('victoire');
                 terminerPartie(true, "🏁 Ligne d'arrivée franchie avec succès !");
                 return;
             }
