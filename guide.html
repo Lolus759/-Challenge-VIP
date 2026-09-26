@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guide & Primes VIP - Challenge Flight 3D</title>
+    <script>
+        // Vérification de sécurité : Rediriger vers la connexion si l'utilisateur n'est pas connecté
+if (!localStorage.getItem('vip_user_phone') && !localStorage.getItem('current_user')) {
+    window.location.href = "login.html";}
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
